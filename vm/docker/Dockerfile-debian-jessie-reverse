@@ -1,0 +1,56 @@
+FROM debian:jessie
+
+MAINTAINER icecube27
+
+RUN apt-get update \
+  && apt-get install -y \
+    clang \
+    libc6-dev \
+    libc6-dev-x32 \
+    python \
+    ipython \
+    python-pip \
+    python-dev \
+    python3 \
+    python3-dev \
+    ipython3 \
+    strace \
+    gdb \
+    binutils \
+    linux-headers-amd64 \
+    libssl-dev \
+    curl \
+    wget \
+    git \
+  && apt-get clean \
+  && pip install capstone z3-solver pycrypto ropgadget
+
+# Install gmpy2 package for python 2
+RUN apt-get install -y \
+  libgmp-dev \
+  libmpfr-dev \
+  libmpc-dev \
+  && pip install gmpy2
+
+# Install radare2
+RUN git clone https://github.com/radare/radare2.git /opt/radare2 \
+  && /opt/radare2/sys/install.sh
+
+# Install miasm
+RUN git clone https://github.com/serpilliere/elfesteem.git /opt/elfesteem \
+  && cd /opt/elfesteem/ \
+  && python setup.py build \
+  && python setup.py install \
+  && git clone https://github.com/cea-sec/miasm.git /opt/miasm \
+  && cd /opt/miasm \
+  && python /opt/miasm/setup.py install
+
+# Install GEF plugin for GDB
+RUN wget -q -O- https://github.com/hugsy/gef/raw/master/scripts/gef.sh | sh
+
+# Install the pwntools
+RUN pip install --upgrade \
+  setuptools \
+  cffi
+RUN pip install pwntools
+  
